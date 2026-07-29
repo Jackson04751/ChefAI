@@ -50,7 +50,7 @@ class RAGChatbot:
         )
 
         self.llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash-latest",
+            model="gemini-pro",
             temperature=0.3,
 
         )

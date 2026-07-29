@@ -38,7 +38,7 @@ if question:
         with st.chat_message("assistant"):
             with st.spinner("ChefAI đang suy nghĩ..."):
                 try:
-                    # LƯU Ý: Nếu trong rag.py hàm xử lý tên là query() hoặc chat(),
+
 
                     answer = st.session_state.bot.ask(str(question))
                     st.write(answer)

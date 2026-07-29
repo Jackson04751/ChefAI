@@ -1,11 +1,11 @@
 import streamlit as st
 from rag import RAGChatbot
 
-# 1. Cấu hình trang
+# Cấu hình trang
 st.set_page_config(page_title="ChefAI - Món Ngon Việt Nam", page_icon="🤖")
 st.title("🤖 ChefAI Assistant")
 
-# 2. Khởi tạo RAGChatbot trong session_state nếu chưa có
+#  Khởi tạo RAGChatbot trong session_state
 if "bot" not in st.session_state:
     try:
         st.session_state.bot = RAGChatbot()
@@ -13,16 +13,16 @@ if "bot" not in st.session_state:
         st.error(f"Khởi tạo Bot thất bại: {e}")
         st.session_state.bot = None
 
-# 3. Khởi tạo lịch sử tin nhắn
+#  Khởi tạo lịch sử tin nhắn
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# 4. Hiển thị lại toàn bộ lịch sử chat cũ
+#  Hiển thị lại toàn bộ lịch sử chat cũ
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.write(message["content"])
 
-# 5. Xử lý khi người dùng nhập câu hỏi mới
+# Xử lý khi người dùng nhập câu hỏi mới
 question = st.chat_input("Hỏi ChefAI điều gì đó...")
 
 if question:

@@ -50,11 +50,18 @@ class RAGChatbot:
         )
 
         self.llm = ChatGoogleGenerativeAI(
-            model ="gemini-3.5-flash",
+            model='gemini-3.5-flash',
             google_api_key=os.getenv("GOOGLE_API_KEY"),
             temperature=0.3,
-
+            max_retries=6,
         )
+        self.fallback_llm = ChatGoogleGenerativeAI(
+            model='gemini-3.1-pro',
+            google_api_key=os.getenv("GOOGLE_API_KEY"),
+            temperature=0.3,
+            max_retries=3,
+        )
+        self.llm = self.llm.with_fallbacks([self.fallback_llm])
 
     def ask(self, question: str) -> str:
 
@@ -66,29 +73,59 @@ class RAGChatbot:
         context = "\n\n".join(doc.page_content for doc in docs)
 
         prompt = f"""
-Here is the English version of your prompt:
+        Bạn là ChefAI - trợ lý nấu ăn thân thiện.
 
-You are ChefAI – a friendly cooking assistant.
+        Hãy trả lời tự nhiên bằng tiếng Việt.
 
-Please reply in natural English as if you are conversing with the user.
+        Chỉ sử dụng thông tin trong tài liệu dưới đây.
 
-Only use the information provided in the document below.
+        Nếu tài liệu không có câu trả lời thì hãy nói:
 
-If the document does not contain the answer, please say:
-"Sorry, I couldn't find that information in the book."
+        "Xin lỗi, mình không tìm thấy thông tin đó trong tài liệu."
 
-=====================
-TÀI LIỆU
+        =====================
+        TÀI LIỆU
 
-{context}
+        {context}
 
-=====================
+        =====================
 
-CÂU HỎI
+        CÂU HỎI
 
-{question}
-"""
+        {question}
+        """
+
 
         response = self.llm.invoke(prompt)
+        import json
 
-        return str(response.content)
+        
+        if hasattr(response, 'content'):
+            content = response.content
+            # Nếu content là kiểu list (multimodal output), nối các phần text lại
+            if isinstance(content, list):
+                content_str = "".join(
+                    [item.get('text', '') if isinstance(item, dict) else str(item) for item in content]
+                )
+            else:
+                content_str = str(content)
+
+            # Thử giải mã nếu content là một chuỗi JSON
+            try:
+                data = json.loads(content_str)
+                if isinstance(data, dict) and 'text' in data:
+                    return data['text']
+            except (json.JSONDecodeError, TypeError):
+                pass
+
+            return content_str
+
+        # Trường hợp response là một Dictionary
+        if isinstance(response, dict):
+            if 'text' in response:
+                return response['text']
+            if 'content' in response:
+                return response['content']
+
+        return str(response)
+

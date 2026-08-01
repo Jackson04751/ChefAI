@@ -99,7 +99,7 @@ class RAGChatbot:
         response = self.llm.invoke(prompt)
         import json
 
-        
+
         if hasattr(response, 'content'):
             content = response.content
             # Nếu content là kiểu list (multimodal output), nối các phần text lại
@@ -128,4 +128,3 @@ class RAGChatbot:
                 return response['content']
 
         return str(response)
-

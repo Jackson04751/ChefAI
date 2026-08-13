@@ -1,0 +1,20 @@
+
+services:
+  chef_ai:
+    build: .
+    container_name: chef_ai_system
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - ./chroma_data:/app/chroma_data
+
+    environment:
+      - CHROMA_DB_PATH=/app/chroma_data
+      - PYTHONUNBUFFERED=1
+
+    stdin_open: true
+    tty: true
+
+    restart: "no"
